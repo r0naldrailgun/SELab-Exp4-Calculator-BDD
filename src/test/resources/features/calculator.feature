@@ -32,6 +32,7 @@ Feature: Calculator
 
     Examples:
       | first | second | opt | result |
+      | -1    | 6      | +   | 5      |
       | 6     | 2      | +   | 8      |
       | 6     | 2      | *   | 12     |
       | 6     | 2      | /   | 3      |
