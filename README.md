@@ -168,6 +168,7 @@ Scenario Outline: calculate with an operator
 
 Examples:
   | first | second | opt | result |
+  | -1    | 6      | +   | 5      |
   | 6     | 2      | +   | 8      |
   | 6     | 2      | *   | 12     |
   | 6     | 2      | /   | 3      |
@@ -192,6 +193,24 @@ Step Definitions عملگر را دریافت می‌کنند و با `switch` �
 Feature: Calculator
 ```
 
+### خطای Undefined در Scenario Outline برای عدد منفی
+
+**مورد تست مشکل‌دار چه بود؟** در مثال اولیهٔ مستند، ردیف `-1 | 6 | 5` برای جمع دو عدد با خطای `Undefined` روبه‌رو می‌شد. در نسخهٔ نهایی پروژه، همان حالت به‌صورت `-1 | 6 | + | 5` در جدول Scenario Outline قرار دارد.
+
+**علت چه بود؟** الگوی اولیهٔ Step Definition یعنی `(\\d+)` فقط ارقام مثبت را می‌پذیرد؛ به همین دلیل مقدار `-1` با Step Definition تطابق نداشت و Cucumber نمی‌توانست مرحلهٔ `Given` را پیدا کند.
+
+**رفع مشکل چگونه انجام شد؟** الگو به `(-?\\d+)` تغییر کرد. بخش `-?` علامت منفی اختیاری را می‌پذیرد؛ بنابراین هم ورودی مثبت و هم ورودی منفی به یک Step Definition متصل می‌شوند:
+
+```java
+@Given("^Two input values, (-?\\d+) and (-?\\d+)$")
+public void twoInputValuesAnd(int first, int second) {
+    value1 = first;
+    value2 = second;
+}
+```
+
+ردیف `-1 | 6 | + | 5` اکنون یک تست بازگشتی است و در اجرای نهایی بدون Undefined شدن پاس می‌شود.
+
 ### اجرای موفق Scenario Outline
 
 پس از اصلاح ساختار فایل، نمونه‌های Outline با موفقیت اجرا شدند:
@@ -211,8 +230,8 @@ Feature: Calculator
 در اجرای نهایی پروژه با JDK 8، همهٔ سناریوها پاس شدند:
 
 ```text
-9 Scenarios (9 passed)
-27 Steps (27 passed)
+10 Scenarios (10 passed)
+30 Steps (30 passed)
 BUILD SUCCESS
 ```
 
@@ -220,8 +239,8 @@ BUILD SUCCESS
 | --- | ---: | --- |
 | سناریوهای عادی جمع، ضرب، تقسیم و توان | 4 | Passed |
 | سناریوی تقسیم بر صفر | 1 | Passed |
-| نمونه‌های Scenario Outline | 4 | Passed |
-| **مجموع سناریوها** | **9** | **All passed** |
+| نمونه‌های Scenario Outline | 5 | Passed |
+| **مجموع سناریوها** | **10** | **All passed** |
 
 ---
 
@@ -264,4 +283,4 @@ calculator-bdd/
    mvn test
    ```
 
-3. خروجی مورد انتظار `BUILD SUCCESS` و پاس شدن تمام ۹ سناریو است.
+3. خروجی مورد انتظار `BUILD SUCCESS` و پاس شدن تمام ۱۰ سناریو است.
